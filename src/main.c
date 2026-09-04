@@ -1,5 +1,7 @@
 #include <gtk/gtk.h>
 
+#define ICONS(i) (i == 0 ? "Play" : "Pause")
+
 typedef struct AppConfig AppConfig;
 
 struct AppConfig
@@ -28,6 +30,14 @@ static void load_css(void)
     g_object_unref(provider);
 }
 
+void toggle_play_and_pause(GtkWidget *button) 
+{
+    static int current = 0;
+
+    current = current + 1 < 2 ? current + 1 : 0;
+    gtk_button_set_label(GTK_BUTTON(button), ICONS(current));
+}
+
 static void on_activate(GtkApplication *app, gpointer __config) 
 {
     AppConfig *config = __config;
@@ -39,7 +49,7 @@ static void on_activate(GtkApplication *app, gpointer __config)
     // Layout
     GtkWidget *box    = gtk_box_new(
         GTK_ORIENTATION_VERTICAL,
-        10
+        0
     );
 
     gtk_window_set_title(
@@ -77,7 +87,7 @@ static void on_activate(GtkApplication *app, gpointer __config)
     gtk_box_append(GTK_BOX(box), dial);
 
     // `Button` play button
-    GtkWidget *button = gtk_button_new_with_label("▶");
+    GtkWidget *button = gtk_button_new_with_label(ICONS(0));
 
     gtk_widget_add_css_class(
         button,
@@ -86,6 +96,13 @@ static void on_activate(GtkApplication *app, gpointer __config)
 
     gtk_widget_set_halign(button, GTK_ALIGN_CENTER);
 
+
+    g_signal_connect(
+        button,
+        "clicked",
+        G_CALLBACK(toggle_play_and_pause),
+        NULL
+    );
 
     gtk_box_append(GTK_BOX(box), button);
 
