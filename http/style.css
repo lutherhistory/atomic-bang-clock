@@ -1,15 +1,18 @@
-/* Window background with soft rounded corners and subtle border */
 window {
-  background-color: #1e1e2e;
-  color: #cdd6f4;
-  border-radius: 12px;
-  border: 1px solid #313244;
+    background: #2c303d;
 }
 
-/* Base Label Styling */
-label {
-  font-family: "Inter", "Cantarell", sans-serif;
-  font-size: 40px;
-  color: #cdd6f4;
-  transition: all 200ms ease;
+.clock-play {
+    background: #a8c7fa;
+    color: #2c303d;
+
+    min-width: 100px;
+
+    border-radius: 50px;
+    margin: 20px;
+}
+
+.clock-dial {
+    color: white;
+    font-size: 50px;
 }
