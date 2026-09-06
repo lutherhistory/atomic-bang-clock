@@ -1,53 +1,30 @@
-# Compiler and Flags
-CC = gcc
-CFLAGS = -g -Wall -Wextra $(shell pkg-config --cflags gtk4)
-LDFLAGS = $(shell pkg-config --libs gtk4)
+# --- Compile Info ---
+CC 			= gcc
+CFLAGS 		= -Wall -Wextra -O2 $(shell pkg-config --cflags gtk4)
+LIBS 		= $(shell pkg-config --libs gtk4)
 
-# Directory Paths
-BUILD_PATH  = build
-SRC_PATH 	= src
-OBJ_PATH	= $(BUILD_PATH)/obj
+# --- Sources ---
+TARGET 		= build/atomic-bang-clock
+SRC 		= $(wildcard src/*.c)
+OBJ 		= $(patsubst src/%.c, build/%.o, $(SRC))
 
-TARGET 		= $(BUILD_PATH)/atomic-clock
+# --- Targets ---
+.PHONY: all clean
 
-# Source and Object files
-SRC 		:= $(wildcard $(SRC_PATH)/*.c)
-OBJ 		:= $(patsubst $(SRC_PATH)/%.c, $(OBJ_PATH)/%.o, $(SRC))
+all: $(TARGET)
 
-# Create directories
-$(OBJ_PATH):
-	mkdir -p $(OBJ_PATH)
-
-# Default target
-all: $(OBJ_PATH) $(TARGET)
-
-# Link object files to executable
+# --- Linking ---
 $(TARGET): $(OBJ)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
-	@echo "✅ Build complete! Binary: $(TARGET)"
+	$(CC) $(OBJ) -o $@ $(LIBS)
 
-# Compile source files to object files
-$(OBJ_PATH)/%.o: $(SRC_PATH)/%.c | $(OBJ_PATH)
-	$(CC) $(CFLAGS) -c $< -o $@
+# --- Compiling ---
+build/%.o: src/%.c | build
+	bear -- $(CC) $(CFLAGS) -c $< -o $@
 
-# Clean build artifacts
+# --- Build Directory ---
+build:
+	mkdir -p build
+
+# --- Clean ---
 clean:
-	rm -rf $(BUILD_PATH)
-	@echo "🧹 Clean complete!"
-
-# Run the application
-run: all
-	./$(TARGET)
-
-# Run with valgrind (memory check)
-memcheck: all
-	valgrind --leak-check=full --show-leak-kinds=all ./$(TARGET)
-
-# Show debug info
-debug:
-	@echo "SRC: $(SRC)"
-	@echo "OBJ: $(OBJ)"
-	@echo "CFLAGS: $(CFLAGS)"
-	@echo "LDFLAGS: $(LDFLAGS)"
-
-.PHONY: all clean run memcheck debug
+	rm -rf build $(TARGET)
