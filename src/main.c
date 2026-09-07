@@ -1,26 +1,20 @@
+#include <glib.h>
 #include <gtk/gtk.h>
 
-#define ICONS(i) (i == 0 ? "Play" : "Pause")
+#define STYLE_PATH THIS_PATH "/styles"
 
-typedef struct AppConfig AppConfig;
-
-struct AppConfig
-{
+typedef struct {
     const char *title;
-    const char *id;
     int width;
     int height;
-};
+} Config;
 
-static void load_css(void)
-{
+static void load_css(GtkApplication *app, gpointer user_data) {
+    (void) app, (void) user_data;
+
     GtkCssProvider *provider = gtk_css_provider_new();
 
-    gtk_css_provider_load_from_path(
-        provider,
-        "./http/style.css"
-    );
-
+    gtk_css_provider_load_from_path(provider, STYLE_PATH "/main.css");
     gtk_style_context_add_provider_for_display(
         gdk_display_get_default(),
         GTK_STYLE_PROVIDER(provider),
@@ -30,101 +24,42 @@ static void load_css(void)
     g_object_unref(provider);
 }
 
-void toggle_play_and_pause(GtkWidget *button) 
-{
-    static int current = 0;
+static void on_activate(GtkApplication *app, gpointer _config_) {
+    Config *config = _config_;
 
-    current = current + 1 < 2 ? current + 1 : 0;
-    gtk_button_set_label(GTK_BUTTON(button), ICONS(current));
-}
-
-static void on_activate(GtkApplication *app, gpointer __config) 
-{
-    AppConfig *config = __config;
-
-
-    // Window
     GtkWidget *window = gtk_application_window_new(app);
+    gtk_window_set_default_size(GTK_WINDOW(window), config->width, config->height);
+    gtk_window_set_title(GTK_WINDOW(window), config->title);
 
-    // Layout
-    GtkWidget *box    = gtk_box_new(
-        GTK_ORIENTATION_VERTICAL,
-        0
-    );
-
-    gtk_window_set_title(
-        GTK_WINDOW(window), 
-        config->title
-    );
-    gtk_window_set_default_size(
-        GTK_WINDOW(window), 
-        config->width, 
-        config->height
-    );
-
+    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_window_set_child(GTK_WINDOW(window), box);
 
+    GtkWidget *label = gtk_label_new("00:00:00");
+    gtk_widget_add_css_class(label, "clock-dial");
 
-    // `Clock` Dial
-    GtkWidget *dial = gtk_label_new("00:00:00");
+    GTimer *timer = g_timer_new();
 
-    gtk_widget_add_css_class(
-        dial,
-        "clock-dial"
-    );
+    gdouble elapsed = g_timer_elapsed(timer, NULL);
+    g_print("Elasped: %f secounds", elapsed);
 
-    gtk_widget_set_halign(
-        dial,
-        GTK_ALIGN_CENTER
-    );
+    g_timer_destroy(timer);
 
-    gtk_widget_set_valign(
-        dial,
-        GTK_ALIGN_CENTER
-    );
-    gtk_widget_set_vexpand(dial, TRUE);
-
-    gtk_box_append(GTK_BOX(box), dial);
-
-    // `Button` play button
-    GtkWidget *button = gtk_button_new_with_label(ICONS(0));
-
-    gtk_widget_add_css_class(
-        button,
-        "clock-play"
-    );
-
-    gtk_widget_set_halign(button, GTK_ALIGN_CENTER);
-
-
-    g_signal_connect(
-        button,
-        "clicked",
-        G_CALLBACK(toggle_play_and_pause),
-        NULL
-    );
-
-    gtk_box_append(GTK_BOX(box), button);
-
-    // Window shows up
+    gtk_box_append(GTK_BOX(box), label);
     gtk_window_present(GTK_WINDOW(window));
 }
 
-int main(int argc, char **argv) 
-{
+int main(int argc, char **argv) {
     GtkApplication *app;
     int status;
 
-    /// Application Setup...
-    AppConfig config  = {
-        .title  = "Atomi Bang Clock",
-        .id     = "io.github.lutherhistory.atomic-bang-clock",
+    Config config = {
+        .title  = "Atomic Bang Clock",
         .width  = 800,
         .height = 500
     };
 
     app = gtk_application_new(
-        config.id,
+        "io.github.lutherhistory.atomic-bang-clock",
         G_APPLICATION_DEFAULT_FLAGS
     );
 
@@ -136,20 +71,18 @@ int main(int argc, char **argv)
     );
 
     g_signal_connect(
-        G_APPLICATION(app),
+        app,
         "activate",
         G_CALLBACK(on_activate),
         &config
     );
 
-    /// Application Loop...
     status = g_application_run(
         G_APPLICATION(app),
         argc,
         argv
     );
 
-    /// Free up Memories...
     g_object_unref(app);
     return status;
 }
