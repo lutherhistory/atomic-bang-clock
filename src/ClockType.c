@@ -1,83 +1,132 @@
 #include "ClockType.h"
+#include "glib.h"
 #include "gtk/gtk.h"
-#include "gtk/gtkshortcut.h"
-#include <glib.h>
 
-void update_clock(ClockType *thisClock)
+static void update_clock_text_format(ClockType *clock);
+static void update_clock_time_format(ClockType *clock);
+
+void update_clock_text_format(ClockType *clock)
 {
-    thisClock->text = g_strdup_printf(
+    if (!clock || !GTK_IS_LABEL(clock->display)) {
+        return;
+    }
+    update_clock_time_format(clock);
+    gchar *text = g_strdup_printf(
         "%02d:%02d:%02d",
-        thisClock->h,
-        thisClock->m,
-        thisClock->s
+        clock->hr,
+        clock->min,
+        clock->sec
     );
+    gtk_label_set_label(GTK_LABEL(clock->display), text);
 
-    gtk_label_set_label(GTK_LABEL(thisClock->label), thisClock->text);
-    g_free(thisClock->text);
+    g_free(text);
 }
 
-ClockType *clock_type_new(int h, int m, int s)
+void update_clock_time_format(ClockType *clock)
 {
-    ClockType *thisClock = g_new(ClockType, 1);
+    if (!clock) {
+        return;
+    }
 
-    thisClock->h = h;
-    thisClock->m = m;
-    thisClock->s = s;
+    if (clock->sec > 59)
+    {
+        clock->sec = 0;
+        clock->min++;
+    }
+    else if (clock->sec < 0)
+    {
+        clock->sec = 0;
+        clock->min--;
+    }
 
-    thisClock->label = gtk_label_new("");
-    update_clock(thisClock);
+    if (clock->min > 59)
+    {
+        clock->min = 0;
+        clock->hr++;
+    }
+    else if (clock->min < 0)
+    {
+        clock->min = 0;
+        clock->hr--;
+    }
 
-    return thisClock;
-}
-
-GtkWidget *clock_type_new_dial(gchar *text)
-{
-    GtkWidget *dial = gtk_label_new(text);
-
-    gtk_widget_add_css_class(dial, "ClockType-label");
-    gtk_widget_set_halign(dial, GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(dial, GTK_ALIGN_CENTER);
-
-    return dial;
-}
-
-GtkWidget *clock_type_new_play_button(void)
-{
-    GtkWidget *btn = gtk_button_new_with_label("Play");
-
-    gtk_widget_add_css_class(btn, "ClockType-play");
-    gtk_widget_set_halign(btn, GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(btn, GTK_ALIGN_END);
-
-    return btn;
-}
-
-void clock_type_free(ClockType *thisClock)
-{
-    if (thisClock) {
-        g_free(thisClock);
+    if (clock->hr < 0 || clock->hr > 23)
+    {
+        clock->hr = 0;
+        clock->min = 0;
+        clock->sec = 0;
     }
 }
 
-gboolean update_time(gpointer _clockData_)
+ClockType *clock_type_new(gint h, gint m, gint s)
 {
-    ClockType *clockData = _clockData_;
+    ClockType *clock = g_new(ClockType, 1);
 
-    if (clockData) {
-        clockData->s += 1;
+    clock->hr  = h;
+    clock->min = m;
+    clock->sec = s;
+    clock->rate = 0;
 
-        update_clock(_clockData_);
+    clock->display = NULL;
+
+    return clock;
+}
+
+void clock_type_free(ClockType **_clock_)
+{
+    if (_clock_ && *_clock_) {
+        g_free(*_clock_);
+        *_clock_ = NULL;
+    }
+}
+
+GtkWidget *clock_type_get_display(ClockType *clock)
+{
+    clock->display = gtk_label_new("");
+    gtk_widget_add_css_class(clock->display, "ClockType-label");
+
+    update_clock_text_format(clock);
+
+    return clock->display;
+}
+
+void clock_type_start(GtkButton *play_button, gpointer _p_clock_)
+{
+    ClockType *clock = _p_clock_;
+
+    if (clock && play_button) {
+        clock->rate = !clock->rate;
+
+        if (clock->rate)
+        {
+            gtk_button_set_label(play_button, "Pause");
+            gtk_widget_add_css_class(
+                GTK_WIDGET(play_button),
+                "paused"
+            );
+        }
+
+        else
+        {
+            gtk_button_set_label(play_button, "Play");
+            gtk_widget_remove_css_class(
+                GTK_WIDGET(play_button),
+                "paused"
+            );
+        }
+    }
+}
+
+gboolean update_time(gpointer _p_clock_)
+{
+    ClockType *clock = _p_clock_;
+
+    if (clock) {
+        clock->sec += clock->rate;
+        update_clock_text_format(clock);
+
         return G_SOURCE_CONTINUE;
     }
 
     return G_SOURCE_REMOVE;
-}
-
-gboolean on_close_request(ClockType **clock)
-{
-    clock_type_free(*clock);
-    *clock = NULL;
-    g_message("ClockType has cleaned up");
-
-    return FALSE;
 }

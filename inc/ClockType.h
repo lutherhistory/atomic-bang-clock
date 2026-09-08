@@ -4,26 +4,25 @@
 #include "glib.h"
 #include <gtk/gtk.h>
 
-typedef struct
+typedef struct ClockType
 {
-    gint h;
-    gint m;
-    gint s;
-    gchar *text;
+    gint hr;
+    gint min;
+    gint sec;
 
-    GtkWidget *label;
+    gint rate;
+
+    GtkWidget *display;
 } ClockType;
 
-ClockType *clock_type_new(int h, int m, int s);
+ClockType *clock_type_new(gint h, gint m, gint s);
 
-GtkWidget *clock_type_new_dial(gchar *text);
+void clock_type_free(ClockType **_p_clock_);
 
-GtkWidget *clock_type_new_play_button(void);
+GtkWidget *clock_type_get_display(ClockType *clock);
 
-void clock_type_free(ClockType *thisClock);
+void clock_type_start(GtkButton *play_button, gpointer _p_clock_);
 
-gboolean update_time(gpointer _clockData_);
-
-gboolean on_close_request(ClockType **clock);
+gboolean update_time(gpointer _p_clock_);
 
 #endif

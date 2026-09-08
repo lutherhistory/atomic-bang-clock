@@ -1,61 +1,92 @@
-// #include "ClockType.h"
-#include "ClockType.h"
-#include "glib-object.h"
-#include "gtk/gtkshortcut.h"
-#include <glib.h>
 #include <gtk/gtk.h>
+
+#include "ClockType.h"
+#include "glib.h"
 
 #define STYLE_PATH THIS_PATH "/styles"
 
-typedef struct
-{
-    const char *title;
-    int width;
-    int height;
+typedef struct Config Config;
+typedef struct ClockType ClockType;
 
-    ClockType *clock;
+
+typedef struct Config
+{
+    gint width;
+    gint height;
+    const gchar *title;
+
+    ClockType *myClock;
 } Config;
 
-typedef struct
+/// Widget allocations
+static GtkWindow *create_window(GtkWidget *window, Config *config)
 {
-    GtkWidget *mainLayout;
-    GtkWidget *dialLayout;
-    GtkWidget *btnsLayout;
-} Container;
-
-/// --- Container Contents ---
-// ...
-
-/// --- Widgets Contents ---
-GtkWidget *create_window(GtkApplication *app, gpointer _config_, Container *container)
-{
-    GtkWidget   *window = gtk_application_window_new(app);
-    Config      *config = _config_;
-
-    // Child & Styles
-    gtk_window_set_default_size(GTK_WINDOW(window), config->width, config->height);
+    gtk_window_set_default_size(
+        GTK_WINDOW(window),
+        config->width,
+        config->height
+    );
     gtk_window_set_title(GTK_WINDOW(window), config->title);
-    gtk_box_append(GTK_BOX(container->mainLayout), container->dialLayout);
-    gtk_box_append(GTK_BOX(container->mainLayout), container->btnsLayout);
 
-    // Positioning
-    gtk_widget_set_halign(container->mainLayout, GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(container->mainLayout, GTK_ALIGN_CENTER);
-
-    gtk_widget_set_halign(container->btnsLayout, GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(container->btnsLayout, GTK_ALIGN_END);
-
-    gtk_window_set_child(GTK_WINDOW(window), container->mainLayout);
-
-    return window;
+    return GTK_WINDOW(window);
 }
 
-/// --- Application Contents ---
-static void load_css(void)
+static GtkBox *create_container(GtkWindow *window, GtkBox *layout1, GtkBox *layout2)
 {
-    GtkCssProvider *provider = gtk_css_provider_new();
+    GtkWidget *container = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign(container, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(container, GTK_ALIGN_CENTER);
 
-    gtk_css_provider_load_from_path(provider, STYLE_PATH "/main.css");
+    gtk_box_append(GTK_BOX(container), GTK_WIDGET(layout1));
+    gtk_box_append(GTK_BOX(container), GTK_WIDGET(layout2));
+
+    gtk_window_set_child(window, GTK_WIDGET(container));
+
+    return GTK_BOX(container);
+}
+
+static GtkBox *create_dialLayout(ClockType **clock)
+{
+    GtkWidget *layout = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_halign(layout, GTK_ALIGN_CENTER);
+
+    GtkWidget *label = clock_type_get_display(*clock);
+    gtk_widget_add_css_class(layout, "ClockType-label");
+
+    gtk_box_append(GTK_BOX(layout), label);
+
+    return GTK_BOX(layout);
+}
+
+static GtkBox *create_btnsLayout(ClockType **clock)
+{
+    GtkWidget *layout = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    gtk_widget_set_halign(layout, GTK_ALIGN_CENTER);
+
+    GtkWidget *play_btn = gtk_button_new_with_label("Play");
+    gtk_widget_add_css_class(play_btn, "ClockType-play");
+    gtk_box_append(GTK_BOX(layout), play_btn);
+
+    g_signal_connect(
+        play_btn,
+        "clicked",
+        G_CALLBACK(clock_type_start),
+        *clock
+    );
+
+    return GTK_BOX(layout);
+}
+
+/// Application Callback
+static void load_css(GtkApplication *app, gpointer _config_)
+{
+    (void) app, (void) _config_;
+
+    GtkCssProvider *provider = gtk_css_provider_new();
+    gtk_css_provider_load_from_path(
+        provider,
+        STYLE_PATH "/main.css"
+    );
     gtk_style_context_add_provider_for_display(
         gdk_display_get_default(),
         GTK_STYLE_PROVIDER(provider),
@@ -67,35 +98,20 @@ static void load_css(void)
 
 static void on_activate(GtkApplication *app, gpointer _config_)
 {
-    // Containers
-    Container   container = {
-        .mainLayout = gtk_box_new(GTK_ORIENTATION_VERTICAL,   0),
-        .dialLayout = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0),
-        .btnsLayout = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0)
-    };
+    Config      *config = _config_;
+    GtkWindow   *window     = create_window(gtk_application_window_new(app), _config_);
+    GtkBox      *dialLayout = create_dialLayout(&config->myClock);
+    GtkBox      *btnsLayout = create_btnsLayout(&config->myClock);
 
-    // Widgets
-    ClockType   *myClock    = clock_type_new(0, 0, 7);
-    GtkWidget   *window     = create_window(app, _config_, &container);
+    create_container(window, dialLayout, btnsLayout);
 
-    GtkWidget   *label      = myClock->label;
-    GtkWidget   *btn        = gtk_button_new_with_label("Play");
-
-    // Imply Widgets
-    gtk_widget_add_css_class(label, "ClockType-label");
-    gtk_box_append(GTK_BOX(container.dialLayout), label);
-
-    gtk_widget_add_css_class(btn, "ClockType-play");
-    gtk_box_append(GTK_BOX(container.btnsLayout), btn);
-
-    gtk_window_present(GTK_WINDOW(window));
-
-    // Tasks
     g_timeout_add(
         1000,
         update_time,
-        myClock
+        config->myClock
     );
+
+    gtk_window_present(window);
 }
 
 int main(int argc, char **argv)
@@ -105,12 +121,12 @@ int main(int argc, char **argv)
         G_APPLICATION_DEFAULT_FLAGS
     );
     Config config = {
-        .title  = "Atomic Bang Clock",
         .width  = 800,
         .height = 500,
-        .clock  = clock_type_new(0, 0, 7)
+        .title  = "Atomic Bang Clock",
+
+        .myClock = clock_type_new(0, 0, 0)
     };
-    int status;
 
     g_signal_connect(
         app,
@@ -126,12 +142,13 @@ int main(int argc, char **argv)
         &config
     );
 
-    status = g_application_run(
+    int status = g_application_run(
         G_APPLICATION(app),
         argc,
         argv
     );
 
+    clock_type_free(&config.myClock);
     g_object_unref(app);
     return status;
 }

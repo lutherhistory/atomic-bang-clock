@@ -39,10 +39,24 @@ window {
     opacity: 0.5;
 }
 
+/* Paused state - Red button */
+.ClockType-play.paused {
+    background: #f28b82;
+    color: #2c303d;
+}
+
+.ClockType-play.paused:hover {
+    background: #ff9e94;
+}
+
+.ClockType-play.paused:active {
+    background: #e07a70;
+}
+
 /* Time Label */
 .ClockType-label {
     color: #ffffff;
-    font-size: 60px;
+    font-size: 90px;
     font-weight: bold;
     padding: 8px 0;
     letter-spacing: 1px;
