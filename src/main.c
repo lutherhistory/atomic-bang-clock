@@ -1,17 +1,56 @@
+// #include "ClockType.h"
+#include "ClockType.h"
+#include "glib-object.h"
+#include "gtk/gtkshortcut.h"
 #include <glib.h>
 #include <gtk/gtk.h>
 
 #define STYLE_PATH THIS_PATH "/styles"
 
-typedef struct {
+typedef struct
+{
     const char *title;
     int width;
     int height;
 } Config;
 
-static void load_css(GtkApplication *app, gpointer user_data) {
-    (void) app, (void) user_data;
+typedef struct
+{
+    GtkWidget *mainLayout;
+    GtkWidget *dialLayout;
+    GtkWidget *btnsLayout;
+} Container;
 
+/// --- Container Contents ---
+// ...
+
+/// --- Widgets Contents ---
+GtkWidget *create_window(GtkApplication *app, gpointer _config_, Container *container)
+{
+    GtkWidget   *window = gtk_application_window_new(app);
+    Config      *config = _config_;
+
+    // Child & Styles
+    gtk_window_set_default_size(GTK_WINDOW(window), config->width, config->height);
+    gtk_window_set_title(GTK_WINDOW(window), config->title);
+    gtk_box_append(GTK_BOX(container->mainLayout), container->dialLayout);
+    gtk_box_append(GTK_BOX(container->mainLayout), container->btnsLayout);
+
+    // Positioning
+    gtk_widget_set_halign(container->mainLayout, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(container->mainLayout, GTK_ALIGN_CENTER);
+
+    gtk_widget_set_halign(container->btnsLayout, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(container->btnsLayout, GTK_ALIGN_END);
+
+    gtk_window_set_child(GTK_WINDOW(window), container->mainLayout);
+
+    return window;
+}
+
+/// --- Application Contents ---
+static void load_css(void)
+{
     GtkCssProvider *provider = gtk_css_provider_new();
 
     gtk_css_provider_load_from_path(provider, STYLE_PATH "/main.css");
@@ -24,44 +63,58 @@ static void load_css(GtkApplication *app, gpointer user_data) {
     g_object_unref(provider);
 }
 
-static void on_activate(GtkApplication *app, gpointer _config_) {
-    Config *config = _config_;
+static void on_activate(GtkApplication *app, gpointer _config_)
+{
+    // Containers
+    Container   container = {
+        .mainLayout = gtk_box_new(GTK_ORIENTATION_VERTICAL,   0),
+        .dialLayout = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0),
+        .btnsLayout = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0)
+    };
 
-    GtkWidget *window = gtk_application_window_new(app);
-    gtk_window_set_default_size(GTK_WINDOW(window), config->width, config->height);
-    gtk_window_set_title(GTK_WINDOW(window), config->title);
+    // Widgets
+    ClockType   *myClock    = clock_type_new(0, 0, 7);
+    GtkWidget   *window     = create_window(app, _config_, &container);
 
-    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
-    gtk_window_set_child(GTK_WINDOW(window), box);
+    GtkWidget   *label      = myClock->label;
+    GtkWidget   *btn        = gtk_button_new_with_label("Play");
 
-    GtkWidget *label = gtk_label_new("00:00:00");
-    gtk_widget_add_css_class(label, "clock-dial");
+    g_signal_connect(
+        window,
+        "close-request",
+        G_CALLBACK(on_close_request),
+        myClock
+    );
 
-    GTimer *timer = g_timer_new();
+    // Imply Widgets
+    gtk_widget_add_css_class(label, "ClockType-label");
+    gtk_box_append(GTK_BOX(container.dialLayout), label);
 
-    gdouble elapsed = g_timer_elapsed(timer, NULL);
-    g_print("Elasped: %f secounds", elapsed);
+    gtk_widget_add_css_class(btn, "ClockType-play");
+    gtk_box_append(GTK_BOX(container.btnsLayout), btn);
 
-    g_timer_destroy(timer);
-
-    gtk_box_append(GTK_BOX(box), label);
     gtk_window_present(GTK_WINDOW(window));
+
+    // Tasks
+    g_timeout_add(
+        1000,
+        update_time,
+        myClock
+    );
 }
 
-int main(int argc, char **argv) {
-    GtkApplication *app;
-    int status;
-
+int main(int argc, char **argv)
+{
+    GtkApplication *app = gtk_application_new(
+        "io.github.lutherhistory.atomic-bang-clock",
+        G_APPLICATION_DEFAULT_FLAGS
+    );
     Config config = {
         .title  = "Atomic Bang Clock",
         .width  = 800,
         .height = 500
     };
-
-    app = gtk_application_new(
-        "io.github.lutherhistory.atomic-bang-clock",
-        G_APPLICATION_DEFAULT_FLAGS
-    );
+    int status;
 
     g_signal_connect(
         app,

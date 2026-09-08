@@ -1,19 +1,77 @@
+/* GTK4 Native Styling */
+
 window {
     background: #2c303d;
 }
 
-.clock-play {
+/* Container for clock elements (add this widget in GTK code) */
+.ClockType-container {
+    background: #1e222d;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 16px;
+}
+
+/* Play Button - Consolidated style */
+.ClockType-play {
     background: #a8c7fa;
     color: #2c303d;
 
     min-width: 100px;
+    padding: 10px 24px;
     font-size: 15px;
+    font-weight: 600;
 
     border-radius: 50px;
-    margin: 20px;
+    border: none;
+    margin: 16px;
 }
 
-.clock-dial {
-    color: white;
-    font-size: 50px;
+.ClockType-play:hover {
+    background: #c0d8ff;
+}
+
+.ClockType-play:active {
+    background: #7faef5;
+}
+
+.ClockType-play:disabled {
+    opacity: 0.5;
+}
+
+/* Time Label */
+.ClockType-label {
+    color: #ffffff;
+    font-size: 60px;
+    font-weight: bold;
+    padding: 8px 0;
+    letter-spacing: 1px;
+}
+
+/* Optional: Alternative time label styling with slight color variation */
+.ClockType-label.time-display {
+    color: #d4e0ff;
+}
+
+/* Button variants if needed */
+.ClockType-play.primary {
+    background: #7faef5;
+}
+
+.ClockType-play.primary:hover {
+    background: #9ac2f7;
+}
+
+.ClockType-play.secondary {
+    background: transparent;
+    color: #a8c7fa;
+    border: 2px solid #a8c7fa;
+}
+
+.ClockType-play.secondary:hover {
+    background: rgba(168, 199, 250, 0.1);
+}
+
+.ClockType-play.secondary:active {
+    background: rgba(168, 199, 250, 0.2);
 }
