@@ -1,6 +1,6 @@
 # --- Compile Info ---
 CC 			= gcc
-CFLAGS 		= -Wall -Wextra -O2 -I./inc $(shell pkg-config --cflags gtk4) -DTHIS_PATH=\"$(THIS_PATH)\"
+CFLAGS 		= -g -Wall -Wextra -O2 -I./inc $(shell pkg-config --cflags gtk4) -DTHIS_PATH=\"$(THIS_PATH)\"
 LIBS 		= $(shell pkg-config --libs gtk4)
 
 THIS_PATH = $(shell pwd)

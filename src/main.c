@@ -12,6 +12,8 @@ typedef struct
     const char *title;
     int width;
     int height;
+
+    ClockType *clock;
 } Config;
 
 typedef struct
@@ -79,13 +81,6 @@ static void on_activate(GtkApplication *app, gpointer _config_)
     GtkWidget   *label      = myClock->label;
     GtkWidget   *btn        = gtk_button_new_with_label("Play");
 
-    g_signal_connect(
-        window,
-        "close-request",
-        G_CALLBACK(on_close_request),
-        myClock
-    );
-
     // Imply Widgets
     gtk_widget_add_css_class(label, "ClockType-label");
     gtk_box_append(GTK_BOX(container.dialLayout), label);
@@ -112,7 +107,8 @@ int main(int argc, char **argv)
     Config config = {
         .title  = "Atomic Bang Clock",
         .width  = 800,
-        .height = 500
+        .height = 500,
+        .clock  = clock_type_new(0, 0, 7)
     };
     int status;
 
