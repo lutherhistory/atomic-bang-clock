@@ -71,16 +71,6 @@ make
 make run
 ```
 
-### Install System-wide
-```Bash
-sudo make install
-```
-
-### Uninstall
-```Bash
-sudo make uninstall
-```
-
 ## Project
 ```
 atomic-bang-clock/
