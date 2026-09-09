@@ -20,6 +20,47 @@ typedef struct Config
 } Config;
 
 /// Widget allocations
+static GtkHeaderBar *create_headerbar(GtkWindow *window)
+{
+    GtkWidget *header_bar = gtk_header_bar_new();
+    gtk_widget_add_css_class(header_bar, "ClockType-header");
+
+    GtkWidget *middle = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+    gtk_widget_set_halign(middle, GTK_ALIGN_CENTER);
+    gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header_bar), middle);
+
+    GtkWidget *stopwatch_btn = gtk_button_new_from_icon_name("alarm-symbolic");
+    gtk_widget_add_css_class(stopwatch_btn, "ClockType-stopwatch-btn");
+    gtk_box_append(GTK_BOX(middle), stopwatch_btn);
+
+    GtkWidget *countdown_btn = gtk_button_new_from_icon_name("view-list-symbolic");
+    gtk_widget_add_css_class(countdown_btn, "ClockType-stopwatch-btn");
+    gtk_box_append(GTK_BOX(middle), countdown_btn);
+
+    GtkWidget *live_time_btn = gtk_button_new_from_icon_name("open-menu-symbolic");
+    gtk_widget_add_css_class(live_time_btn, "ClockType-stopwatch-btn");
+    gtk_box_append(GTK_BOX(middle), live_time_btn);
+
+    gtk_widget_set_tooltip_text(
+        stopwatch_btn,
+        "Stopwatch"
+    );
+
+    gtk_widget_set_tooltip_text(
+        countdown_btn,
+        "Countdown"
+    );
+
+    gtk_widget_set_tooltip_text(
+        live_time_btn,
+        "Live Time"
+    );
+
+    gtk_window_set_titlebar(GTK_WINDOW(window), header_bar);
+
+    return GTK_HEADER_BAR(header_bar);
+}
+
 static GtkWindow *create_window(GtkWidget *window, Config *config)
 {
     gtk_window_set_default_size(
@@ -84,7 +125,7 @@ static GtkBox *create_btnsLayout(ClockType **clock)
     GtkWidget *layout = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     gtk_widget_set_halign(layout, GTK_ALIGN_CENTER);
 
-    GtkWidget *play_btn = gtk_button_new_with_label("Play");
+    GtkWidget *play_btn = gtk_button_new_from_icon_name("media-playback-start-symbolic");;
     gtk_widget_add_css_class(play_btn, "ClockType-play");
     gtk_box_append(GTK_BOX(layout), play_btn);
 
@@ -119,11 +160,12 @@ static void load_css(GtkApplication *app, gpointer _config_)
 
 static void on_activate(GtkApplication *app, gpointer _config_)
 {
-    Config      *config = _config_;
+    Config      *config     = _config_;
     GtkWindow   *window     = create_window(gtk_application_window_new(app), _config_);
     GtkBox      *dialLayout = create_dialLayout(&config->myClock);
     GtkBox      *btnsLayout = create_btnsLayout(&config->myClock);
 
+    create_headerbar(window);
     create_container(window, dialLayout, btnsLayout);
 
     g_timeout_add(

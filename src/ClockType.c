@@ -50,7 +50,7 @@ void update_clock_time_format(ClockType *clock)
         clock->hr--;
     }
 
-    if (clock->hr < 0 || clock->hr > 23)
+    if (clock->hr < 0 || clock->hr > 24)
     {
         clock->hr = 0;
         clock->min = 0;
@@ -103,7 +103,7 @@ void clock_type_start(GtkButton *play_button, gpointer _p_clock_)
 
         if (clock->rate)
         {
-            gtk_button_set_label(play_button, "Pause");
+            gtk_button_set_icon_name(play_button, "media-playback-pause-symbolic");
             gtk_widget_add_css_class(
                 GTK_WIDGET(play_button),
                 "paused"
@@ -112,7 +112,7 @@ void clock_type_start(GtkButton *play_button, gpointer _p_clock_)
 
         else
         {
-            gtk_button_set_label(play_button, "Play");
+            gtk_button_set_icon_name(play_button, "media-playback-start-symbolic");
             gtk_widget_remove_css_class(
                 GTK_WIDGET(play_button),
                 "paused"
