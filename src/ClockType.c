@@ -65,7 +65,11 @@ ClockType *clock_type_new(gint h, gint m, gint s)
     clock->hr  = h;
     clock->min = m;
     clock->sec = s;
+
     clock->rate = 0;
+    clock->on_hr  = FALSE;
+    clock->on_min = FALSE;
+    clock->on_sec = FALSE;
 
     clock->display = NULL;
 
@@ -115,6 +119,53 @@ void clock_type_start(GtkButton *play_button, gpointer _p_clock_)
             );
         }
     }
+}
+
+void on_display(GtkEventController *controller, double x, double y, gpointer _p_clock_)
+{
+    (void) controller, (void) y;
+
+    ClockType *clock = _p_clock_;
+
+    if (x > 0 && x < 100)
+    {
+        clock->on_hr  = TRUE;
+        clock->on_min = FALSE;
+        clock->on_sec = FALSE;
+    }
+
+    else if (x > 100 && x < 200)
+    {
+        clock->on_hr  = FALSE;
+        clock->on_min = TRUE;
+        clock->on_sec = FALSE;
+    }
+
+    else if (x > 200 && x < 300)
+    {
+        clock->on_hr  = FALSE;
+        clock->on_min = FALSE;
+        clock->on_sec = TRUE;
+    }
+}
+
+void modify_time(GtkEventController *controller, double dx, double dy, gpointer _p_clock_)
+{
+    (void) controller, (void) dx;
+
+    ClockType *clock = _p_clock_;
+
+    if (!clock || clock->rate != 0)
+        return;
+
+    if (clock->on_sec)
+        clock->sec += -dy;
+    else if (clock->on_min)
+        clock->min += -dy;
+    else if (clock->on_hr)
+        clock->hr  += -dy;
+
+    update_clock_text_format(clock);
 }
 
 gboolean update_time(gpointer _p_clock_)

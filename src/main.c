@@ -1,6 +1,7 @@
 #include <gtk/gtk.h>
 
 #include "ClockType.h"
+#include "glib-object.h"
 #include "glib.h"
 
 #define STYLE_PATH THIS_PATH "/styles"
@@ -53,6 +54,26 @@ static GtkBox *create_dialLayout(ClockType **clock)
     GtkWidget *label = clock_type_get_display(*clock);
     gtk_widget_add_css_class(layout, "ClockType-label");
 
+    GtkEventController *scroll = gtk_event_controller_scroll_new(
+        GTK_EVENT_CONTROLLER_SCROLL_VERTICAL
+    );
+    g_signal_connect(
+        scroll,
+        "scroll",
+        G_CALLBACK(modify_time),
+        *clock
+    );
+
+    GtkEventController *motion = gtk_event_controller_motion_new();
+    g_signal_connect(
+        motion,
+        "motion",
+        G_CALLBACK(on_display),
+        *clock
+    );
+
+    gtk_widget_add_controller(label, scroll);
+    gtk_widget_add_controller(label, motion);
     gtk_box_append(GTK_BOX(layout), label);
 
     return GTK_BOX(layout);
