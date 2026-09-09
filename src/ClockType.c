@@ -35,7 +35,7 @@ void update_clock_time_format(ClockType *clock)
     }
     else if (clock->sec < 0)
     {
-        clock->sec = 0;
+        clock->sec = 59;
         clock->min--;
     }
 
@@ -46,13 +46,13 @@ void update_clock_time_format(ClockType *clock)
     }
     else if (clock->min < 0)
     {
-        clock->min = 0;
+        clock->min = 59;
         clock->hr--;
     }
 
     if (clock->hr < 0 || clock->hr > 24)
     {
-        clock->hr = 0;
+        clock->hr  = 0;
         clock->min = 0;
         clock->sec = 0;
     }
@@ -99,7 +99,10 @@ void clock_type_start(GtkButton *play_button, gpointer _p_clock_)
     ClockType *clock = _p_clock_;
 
     if (clock && play_button) {
-        clock->rate = !clock->rate;
+        if (!clock->rate)
+            clock->rate = -1;
+        else
+            clock->rate = 0;
 
         if (clock->rate)
         {

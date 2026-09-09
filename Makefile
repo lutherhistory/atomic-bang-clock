@@ -1,7 +1,7 @@
 # --- Compile Info ---
 CC 			= gcc
-CFLAGS 		= -g -Wall -Wextra -O2 -I./inc $(shell pkg-config --cflags gtk4) -DTHIS_PATH=\"$(THIS_PATH)\"
-LIBS 		= $(shell pkg-config --libs gtk4)
+CFLAGS 		= -g -Wall -Wextra -O2 -I./inc $(shell pkg-config --cflags gtk4 gstreamer-1.0) -DTHIS_PATH=\"$(THIS_PATH)\"
+LIBS 		= $(shell pkg-config --libs gtk4 gstreamer-1.0)
 
 THIS_PATH = $(shell pwd)
 

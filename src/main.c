@@ -1,14 +1,12 @@
 #include <gtk/gtk.h>
+#include <gst/gst.h>
+#include <glib.h>
 
 #include "ClockType.h"
-#include "glib-object.h"
-#include "glib.h"
 
 #define STYLE_PATH THIS_PATH "/styles"
 
 typedef struct Config Config;
-typedef struct ClockType ClockType;
-
 
 typedef struct Config
 {
@@ -25,35 +23,29 @@ static GtkHeaderBar *create_headerbar(GtkWindow *window)
     GtkWidget *header_bar = gtk_header_bar_new();
     gtk_widget_add_css_class(header_bar, "ClockType-header");
 
+    GtkWidget *settings = gtk_button_new_from_icon_name("open-menu-symbolic");
+    gtk_widget_add_css_class(settings, "settings");
+    gtk_header_bar_pack_start(GTK_HEADER_BAR(header_bar), settings);
+
     GtkWidget *middle = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
     gtk_widget_set_halign(middle, GTK_ALIGN_CENTER);
     gtk_header_bar_set_title_widget(GTK_HEADER_BAR(header_bar), middle);
 
-    GtkWidget *stopwatch_btn = gtk_button_new_from_icon_name("alarm-symbolic");
+    GtkWidget *stopwatch_btn = gtk_button_new_with_label("Alarm");
     gtk_widget_add_css_class(stopwatch_btn, "ClockType-stopwatch-btn");
     gtk_box_append(GTK_BOX(middle), stopwatch_btn);
 
-    GtkWidget *countdown_btn = gtk_button_new_from_icon_name("view-list-symbolic");
+    GtkWidget *countdown_btn = gtk_button_new_with_label("Timer");
     gtk_widget_add_css_class(countdown_btn, "ClockType-stopwatch-btn");
     gtk_box_append(GTK_BOX(middle), countdown_btn);
 
-    GtkWidget *live_time_btn = gtk_button_new_from_icon_name("open-menu-symbolic");
+    GtkWidget *live_time_btn = gtk_button_new_with_label("Live");
     gtk_widget_add_css_class(live_time_btn, "ClockType-stopwatch-btn");
     gtk_box_append(GTK_BOX(middle), live_time_btn);
 
     gtk_widget_set_tooltip_text(
-        stopwatch_btn,
-        "Stopwatch"
-    );
-
-    gtk_widget_set_tooltip_text(
-        countdown_btn,
-        "Countdown"
-    );
-
-    gtk_widget_set_tooltip_text(
-        live_time_btn,
-        "Live Time"
+        settings,
+        "Settings"
     );
 
     gtk_window_set_titlebar(GTK_WINDOW(window), header_bar);
@@ -188,7 +180,7 @@ int main(int argc, char **argv)
         .height = 500,
         .title  = "Atomic Bang Clock",
 
-        .myClock = clock_type_new(0, 0, 0)
+        .myClock = clock_type_new(0, 5, 0)
     };
 
     g_signal_connect(
