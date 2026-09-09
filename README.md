@@ -19,17 +19,10 @@ The idea of trying replace Google timer instead of mine.
 ## Screenshots
 
 <div align="center">
-  <img width="800" alt="Showcase #1" src="docs/showcase1.png" />
+  <img width="800" alt="docs/showcase1.png" src="docs/latest.png" />
   <br/>
-  <em>Showcase #1</em>
+  <em>Overview</em>
   <br/><br/>
-  <img width="800" alt="Showcase #2" src="docs/showcase2.png" />
-  <br/>
-  <em>Showcase #2</em>
-  <br/><br/>
-  <img width="800" alt="Showcase #3" src="docs/showcase3.png" />
-  <br/>
-  <em>Showcase #3</em>
 </div>
 
 ## Requirments
