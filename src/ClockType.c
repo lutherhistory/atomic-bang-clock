@@ -7,10 +7,12 @@ static void update_clock_time_format(ClockType *clock);
 
 void update_clock_text_format(ClockType *clock)
 {
-    if (!clock || !GTK_IS_LABEL(clock->display)) {
+    if (!clock || !GTK_IS_LABEL(clock->display))
         return;
-    }
-    update_clock_time_format(clock);
+
+    if (clock->rate)
+        update_clock_time_format(clock);
+
     gchar *text = g_strdup_printf(
         "%02d:%02d:%02d",
         clock->hr,
@@ -161,12 +163,29 @@ void modify_time(GtkEventController *controller, double dx, double dy, gpointer 
     if (!clock || clock->rate != 0)
         return;
 
-    if (clock->on_sec)
-        clock->sec += -dy;
-    else if (clock->on_min)
-        clock->min += -dy;
-    else if (clock->on_hr)
-        clock->hr  += -dy;
+    if (clock->on_sec) {
+        if (clock->sec > 0 && dy > 0) {
+            clock->sec -= dy;
+        } else if (clock->sec < 59 && dy < 0) {
+            clock->sec -= dy;
+        }
+    }
+
+    else if (clock->on_min) {
+        if (clock->min > 0 && dy > 0) {
+            clock->min -= dy;
+        } else if (clock->min < 59 && dy < 0) {
+            clock->min -= dy;
+        }
+    }
+
+    else if (clock->on_hr) {
+        if (clock->hr > 0 && dy > 0) {
+            clock->hr -= dy;
+        } else if (clock->hr < 24 && dy < 0) {
+            clock->hr -= dy;
+        }
+    }
 
     update_clock_text_format(clock);
 }
