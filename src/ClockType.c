@@ -60,6 +60,11 @@ void update_clock_time_format(ClockType *clock)
     }
 }
 
+gboolean has_finished(ClockType* clock)
+{
+    return !(clock->sec || clock->min || clock->hr) && clock->rate;
+}
+
 ClockType *clock_type_new(gint h, gint m, gint s)
 {
     ClockType *clock = g_new(ClockType, 1);

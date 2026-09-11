@@ -24,6 +24,8 @@ void clock_type_free(ClockType **_p_clock_);
 
 GtkWidget *clock_type_get_display(ClockType *clock);
 
+gboolean has_finished(ClockType* clock);
+
 void clock_type_start(GtkButton *play_button, gpointer _p_clock_);
 
 void on_display(GtkEventController *controller, double x, double y, gpointer _p_clock_);

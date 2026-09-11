@@ -171,6 +171,8 @@ static void on_activate(GtkApplication *app, gpointer _config_)
 
 int main(int argc, char **argv)
 {
+    gst_init(&argc, &argv);
+
     GtkApplication *app = gtk_application_new(
         "io.github.lutherhistory.atomic-bang-clock",
         G_APPLICATION_DEFAULT_FLAGS
