@@ -1,6 +1,14 @@
-# Atomic Bang Clock
+<p align="center">
+  <img src="resources/images/icon.png" width="200px" />
+</p>
 
-> A *clock* program that can use on your machine.
+<h1 align="center">Atomic Bang Clock</h1>
+
+<p align="center">
+  A simple GTK4 timer for Linux
+</p>
+
+---
 
 ## About
 
