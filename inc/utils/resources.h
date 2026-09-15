@@ -1,6 +1,7 @@
 #ifndef RESOURCES_H
 #define RESOURCES_H
 
-#define STYLE_PATH THIS_PATH "/styles"
+#define RESOURCE_PREFIX "/io/github/lutherhistory/atomic-bang-clock/resources"
+#define RES(path) RESOURCE_PREFIX "/" path
 
 #endif

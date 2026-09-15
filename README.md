@@ -4,7 +4,7 @@
 
 <div align="center">
   <a href="https://github.com/lutherhistory/atomic-bang-clock">
-    <img src="resources/images/icon.png" alt="Atomic Bang Clock Logo" width="100" height="100">
+    <img src="docs/latest-logo.png" alt="Atomic Bang Clock Logo" width="100" height="100">
   </a>
 
   <h3 align="center">Atomic Bang Clock</h3>
@@ -75,7 +75,7 @@
 
 ## About The Project
 
-![Atomic Bang Clock](docs/latest.png)
+![Atomic Bang Clock](docs/latest-thumnail.png)
 
 Atomic Bang Clock is a simple desktop time management application for Linux.
 
